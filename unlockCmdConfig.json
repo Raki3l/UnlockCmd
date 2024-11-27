@@ -5,10 +5,11 @@
       "command": "~F,F,F,B,B,B,s",
       "holdstart": 0,
       "unlocked": false,
-      "unlocksnd": "1, 4, 80",
+      "unlocksnd": "1,0,100",
       "hidden": 0,
       "anim": [
-        "0,0, 0,0, -1"
+        "1,0, 0,0, -1"
       ]
     }
+  ]
 }

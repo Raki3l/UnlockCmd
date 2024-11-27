@@ -1,7 +1,7 @@
 -- UnloockCmd: Unlock chars via commands in the select screen.
 -- Version: 1.0
 -- Date: 11/26/2024
--- Author: Rakiel
+-- Author: Rakíel
 -- Compatible with: Ikemen GO v0.99 and nightly
 -- Description: This mod lets you create special commands to unlock chars in the select screen. These commands are defined in the unlockCmdConfig.json file.
 -- To use this mod, you must declare specific parameters inside the unlockCmdConfig.json file. After that, you can call the commands in the select.def.
@@ -208,7 +208,7 @@ end
 --------------------------------------------------------
 
 function checkcommand()
-    for p = 1, 8 do
+    for p = 1, 4 do
         for _, charData in ipairs(unlockConfig.chars) do
             if not charData.unlocked then
                 main.f_commandAdd("hold_start", "/s", 1, 1)
