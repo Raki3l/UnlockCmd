@@ -54,7 +54,7 @@ A module for Ikemen GO that enables configuring char unlock commands and customi
 
 After customizing the unlockCmdConfig, you need to edit the select.def as follows:
 
-``SuaveDude, hidden = 2, unlock = UnlockCmd("SuaveDude")``
+``SuaveDude, hidden = 2, unlock = unlockCmd("SuaveDude")``
 
 You can also use hidden = 3 to turn the cell into a random select cell until the char is unlocked. Note that hidden = 1 will not work with the mod.
 
