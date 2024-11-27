@@ -59,4 +59,4 @@ After customizing the unlockCmdConfig, you need to edit the select.def as follow
 You can also use hidden = 3 to turn the cell into a random select cell until the char is unlocked. Note that hidden = 1 will not work with the mod.
 
 After the command is executed, if you want an unlock animation, you need to add the line ``portrait.anim = *your anim*`` to the [Select Info] in the ``system.def``. By default, the animation number should be 9000, but if your char uses this animation for something else, 
-you should use a different number. If no corresponding animation exists, the char will default to using portrait.spr. Make sure to use a very specific animation number here that doesn't exist in other chars to avoid issues.
+you should use a different number. If no corresponding animation exists, the char will default to using ``portrait.spr``. Make sure to use a very specific animation number here that doesn't exist in other chars to avoid issues.
