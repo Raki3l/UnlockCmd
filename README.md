@@ -1,5 +1,5 @@
 # UnlockCmd
-Unlock chars via commands in the select screen.
+Unlock chars via commands on the select screen.
 
 >Last tested on Ikemen GO v0.99 and Nightly Build (2024-11-22).  
 >Module developed by Rakíel
