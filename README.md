@@ -35,19 +35,19 @@ A module for Ikemen GO that enables configuring char unlock commands and customi
 # Example
   ```json
   {
-  "chars": [
-    {
-      "name": "SuaveDude",
-      "command": "~F,F,F,B,B,B,s",
-      "holdstart": 0,
-      "unlocked": false,
-      "unlocksnd": "1, 4, 80",
-      "hidden": 0,
-      "anim": [
-        "0,0, 0,0, -1"
-      ]
-    }
-  ]
+    "chars": [
+      {
+        "name": "SuaveDude",
+        "command": "~F,F,F,B,B,B,s",
+        "holdstart": 0,
+        "unlocked": false,
+        "unlocksnd": "1, 4, 80",
+        "hidden": 0,
+        "anim": [
+          "0,0, 0,0, -1"
+        ]
+      }
+    ]
   }
  ```
 # Select.def
