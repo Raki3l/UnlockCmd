@@ -1,4 +1,4 @@
--- UnloockCmd: Unlock chars via commands in the select screen.
+-- UnlockCmd: Unlock chars via commands in the select screen.
 -- Version: 1.0
 -- Date: 11/26/2024
 -- Author: Rakíel
@@ -208,7 +208,7 @@ end
 --------------------------------------------------------
 
 function checkcommand()
-    for p = 1, 4 do
+    for p = 1, #main.t_players do
         for _, charData in ipairs(unlockConfig.chars) do
             if not charData.unlocked then
                 main.f_commandAdd("hold_start", "/s", 1, 1)
