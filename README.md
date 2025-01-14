@@ -9,12 +9,12 @@ A module for Ikemen GO that enables configuring char unlock commands and customi
 # Installation
 
 1. Extract archive content into "./external/mods" directory
-2. Add your command and its settings to the unlockCmdConfig.json.
+2. Add your command and its settings to the unlockCmdConfig.def.
 3. Add sprites to unlockCmdSprites.sff, as required.
 5. Add sounds to unlockCmdSounds.snd, as required.
 6. Link the command to the char you want it to unlock in the select.def
 
-# unlockCmdConfig.json parameters
+# unlockCmdConfig.def parameters
 
 - name:
   - The name of the char to be unlocked with the command. It must match exactly how it is written in select.def.  
@@ -28,27 +28,23 @@ A module for Ikemen GO that enables configuring char unlock commands and customi
   - Group, index and volume of the sound to be played when the command is executed. Sounds must be added to unlockCmdSounds.snd.  
 - hidden:
   - If set to 1, the cell will remain invisible until the char is unlocked. Valid values are 1 (true) or 0 (false).  
+- keep:
+  - If true, will keep the char unlocked after closing the game, valid values are 1 (true) or 0 (false).
 - anim:
   - The sprite or anim to be used as the char's portrait when locked. If omitted, the default random select icon from the portrait will be used, this uses the standard .air syntax, allowing you to specify a single sprite or define an anim.  
    You must add your sprites to unlockCmdSprites.sff.  
 
 # Example
-  ```json
-  {
-    "chars": [
-      {
-        "name": "SuaveDude",
-        "command": "~F,F,F,B,B,B,s",
-        "holdstart": 0,
-        "unlocked": false,
-        "unlocksnd": "1, 4, 80",
-        "hidden": 0,
-        "anim": [
-          "0,0, 0,0, -1"
-        ]
-      }
-    ]
-  }
+  ```ini
+[UnlockConfig]
+name = SuaveDude
+command = ~F,F,F,B,B,B,s
+holdstart = 0
+unlocked = false
+unlocksnd = 1,0,100
+hidden = 0
+keep = 0
+anim = 1,0, 0,0, -1
  ```
 # Select.def
 

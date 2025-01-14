@@ -1,63 +1,86 @@
 -- UnlockCmd: Unlock chars via commands in the select screen.
 -- Version: 1.0
--- Date: 11/26/2024
+-- Date: 01/10/2025
 -- Author: Rakíel
 -- Compatible with: Ikemen GO v0.99 and nightly
 -- Description: This mod lets you create special commands to unlock chars in the select screen. These commands are defined in the unlockCmdConfig.json file.
--- To use this mod, you must declare specific parameters inside the unlockCmdConfig.json file. After that, you can call the commands in the select.def.
---
--- unlockConfig.json parameters:
--- * name: The name of the char to be unlocked with the command. It must match exactly how it is written in select.def, e.g., "kfm".
--- * command: Write here the command to unlock the char (in the same format as commands are written in the char's CMD file), e.g., "~F,F,F,B,B,s".
--- * holdstart: If set to 1, the command requires holding the start button to execute.
--- * unlocked: If set to true, the char will be unlocked by default.
--- * unlocksnd: Group, index and volume of the sound to be played when the command is executed. Sounds must be added to unlockCmdSounds.snd, e.g., "1,0,100".
--- * hidden: If true, the cell will remain invisible, valide values are 1 (true) or 0 (false)
--- * anim: Group and index of the sprite to be used as the char's portrait when locked. If omitted, the default random select icon from the portrait will be used.
---   This uses the standard .air syntax, allowing you to specify a single sprite or define an anim, e.g.:
---   "anim": [
---       "1,0, 0,0, 10",
---       "1,1, 0,0, 10"
---   ]
---   You must add your sprites to unlockCmdSprites.sff.
---
--- EXAMPLE (in select.def):
--- kfmZ, hidden = 2, unlock = UnlockCmd("kfmZ")
+-- To use this mod, you must declare specific parameters inside the unlockCmdConfig.def file. After that, you can call the commands in the select.def.
 
 --------------------------------------------------------
 --- General functions
 --------------------------------------------------------
+function loadUnlockConfig(path) --Load def file which contains data
+    local defaultDef = [[
+; Default Unlock Config
+[UnlockConfig]
+name = 
+command = 
+holdstart = 0
+unlocked = false
+unlocksnd = 0,0,0
+hidden = 0
+keep = 0
+anim = 0,0, 0,0, -1
+]]
 
-function loadUnlockConfig(path)
     local file = io.open(path, "r")
     if not file then
-        local defaultConfig = [[
-{
-  "chars": [
-    {
-      "name": "",
-      "command": "",
-      "holdstart": 0,
-      "unlocked": false,
-      "unlocksnd": "0, 0, 0",
-      "hidden": 0,
-      "anim": [
-        "0,0, 0,0, -1"
-      ]
-    }
-  ]
-}
-]]
         file = io.open(path, "w")
-        file:write(defaultConfig)
+        file:write(defaultDef)
         file:close()
     else
         file:close()
     end
 
-    local config = json.decode(main.f_fileRead(path)) or {chars = {}}
+    -- Read the .def file
+    local config = {chars = {}}
+    local section = nil
+    local isAnimSection = false
+    local animLines = {}
 
-    -- Default values
+    local content = main.f_fileRead(path)
+    content = content:gsub('([^\r\n;]*)%s*;[^\r\n]*', '%1')
+    content = content:gsub('\n%s*\n', '\n')
+    for line in content:gmatch('[^\r\n]+') do
+        local lineCase = line:lower()
+        if lineCase:match('^%s*%[unlockconfig%]%s*$') then
+            if section and isAnimSection then
+                section.anim = animLines
+            end
+            section = {}
+            table.insert(config.chars, section)
+            isAnimSection = false
+            animLines = {}
+        elseif section then
+            local param, value = line:match('^%s*(.-)%s*=%s*(.-)%s*$')
+            if param and value then
+                if param:match('anim') then
+                    isAnimSection = true
+                    table.insert(animLines, value)
+                elseif param:match('unlocksnd') then
+                    local values = {}
+                    for num in value:gmatch('[^,]+') do
+                        table.insert(values, tonumber(num) or num)
+                    end
+                    section[param] = values
+                elseif tonumber(value) then
+                    section[param] = tonumber(value)
+                elseif value == "true" or value == "false" then
+                    section[param] = value == "true"
+                else
+                    section[param] = value
+                end
+            elseif isAnimSection then
+                table.insert(animLines, line:match('^%s*(.-)%s*$'))
+            end
+        end
+    end
+
+    if section and isAnimSection then
+        section.anim = animLines
+    end
+
+    -- Default Values
     for _, charData in ipairs(config.chars) do
         if charData.hidden == nil then
             charData.hidden = 0
@@ -69,14 +92,19 @@ function loadUnlockConfig(path)
             charData.unlocked = false
         end
         if charData.unlocksnd == nil then
-            charData.unlocksnd = "0, 0, 0"
+            charData.unlocksnd = {0, 0, 0}
+        end
+        if charData.keep == nil then
+            charData.keep = 0
+        end
+        if charData.anim == nil or #charData.anim == 0 then
+            charData.anim = {"0,0, 0,0, -1"}
         end
     end
-
     return config
 end
 
-unlockConfig = loadUnlockConfig('external/mods/unlockCmdConfig.json')
+unlockConfig = loadUnlockConfig('external/mods/unlockCmd/unlockCmdConfig.def')
 
 function unlockCmd(name)
     for _, charData in ipairs(unlockConfig.chars) do
@@ -91,10 +119,10 @@ end
 local charAnims = {}
 -- Function to create a custom anim
 function createAnim(charData)
-    if not charData.anim then
+    if not charData.anim or #charData.anim == 0 then
         return nil
     end
-    local spriteData = sffNew('external/mods/unlockCmdSprites.sff')  -- Loads the sff file
+    local spriteData = sffNew('external/mods/unlockCmd/unlockCmdSprites.sff')  -- Loads the sff file
     local animString = table.concat(charData.anim, "\n")
     local anim = animNew(spriteData, animString)
     spriteData = 0
@@ -103,16 +131,69 @@ end
 
 -- Function to play the unlock sound
 function playUnlockSound(charData)
-    local centralSoundFile = sndNew('external/mods/unlockCmdSounds.snd')  -- Loads the snd file
-    if charData.unlocksnd and centralSoundFile then
-        local sndValues = {}
-        for value in string.gmatch(charData.unlocksnd, "%d+") do
-            table.insert(sndValues, tonumber(value))
+    local centralSoundFile = sndNew('external/mods/unlockCmd/unlockCmdSounds.snd')  -- Load the .snd file
+    if charData.unlocksnd and #charData.unlocksnd == 3 and centralSoundFile then
+        sndPlay(centralSoundFile, charData.unlocksnd[1], charData.unlocksnd[2], charData.unlocksnd[3])
+    end
+end
+
+-- Function to save the def file
+function saveUnlockConfig(path, config)
+     -- Reads the content of the original file
+    local originalContent = {}
+    local file = io.open(path, "r")
+    if file then
+        for line in file:lines() do
+            table.insert(originalContent, line)
         end
-        if #sndValues == 3 then
-            sndPlay(centralSoundFile, sndValues[1], sndValues[2], sndValues[3])
+        file:close()
+    end
+
+     -- Builds a new table for the updated content
+    local updatedContent = {}
+    local charIndex = 1
+    local insideSection = false
+
+    for _, line in ipairs(originalContent) do
+        local trimmedLine = line:match("^%s*(.-)%s*$")
+        if trimmedLine:match("^%[UnlockConfig%]$") then
+             -- Detects the start of a new section
+            if config.chars[charIndex] then
+                table.insert(updatedContent, "[UnlockConfig]")
+                for key, value in pairs(config.chars[charIndex]) do
+                    if key == "unlocksnd" and type(value) == "table" then
+                        table.insert(updatedContent, string.format("%s = %s", key, table.concat(value, ",")))
+                    elseif key == "anim" and type(value) == "table" then
+                        table.insert(updatedContent, string.format("%s = %s", key, table.concat(value, ",")))
+                    elseif type(value) == "boolean" then
+                        table.insert(updatedContent, string.format("%s = %s", key, value and "true" or "false"))
+                    else
+                        table.insert(updatedContent, string.format("%s = %s", key, tostring(value)))
+                    end
+                end
+                table.insert(updatedContent, "")
+                charIndex = charIndex + 1
+                insideSection = true
+            else
+                insideSection = false
+            end
+        elseif not insideSection then
+            table.insert(updatedContent, line)
         end
     end
+    
+    -- Writes the updated content back to the file
+    file = io.open(path, "w")
+    if not file then
+        return false
+    end
+
+    for _, line in ipairs(updatedContent) do
+        file:write(line .. "\n")
+    end
+
+    file:close()
+    return true
 end
 
 --------------------------------------------------------
@@ -221,6 +302,10 @@ function checkcommand()
                     charData.unlocked = true
                     main.f_unlock(true)
                     playUnlockSound(charData)
+                    if charData.keep == 1 then
+                        -- Save the .def
+                        saveUnlockConfig('external/mods/unlockCmd/unlockCmdConfig.def', unlockConfig)
+                    end
                 end
             end
             -- Load sprites/anim for locked chars
