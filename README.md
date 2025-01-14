@@ -4,7 +4,7 @@ Unlock chars via commands on the select screen.
 >Last tested on Ikemen GO v0.99 and Nightly Build (2024-11-22).  
 >Module developed by Rakíel
 
-A module for Ikemen GO that enables configuring char unlock commands and customizing animations for hidden chars directly via JSON.
+A module for Ikemen GO that enables configuring char unlock commands and customizing animations for hidden chars directly via def file.
 
 # Installation
 
