@@ -36,7 +36,7 @@ A module for Ikemen GO that enables configuring char unlock commands and customi
 
 # Example
   ```ini
-[UnlockConfig]
+[UnlockConfig] ; You'll need this for every char
 name = SuaveDude
 command = ~F,F,F,B,B,B,s
 holdstart = 0
